@@ -1,7 +1,12 @@
 import os
+import nltk
 import random
 from dotenv import load_dotenv
 from pyrogram import Client, filters
+from nltk.tokenize import word_tokenize
+
+# Загрузка ресурсов для токенизации
+nltk.download('punkt')  
 
 # Загрузка переменных окружения из файла .env
 load_dotenv('.env')
@@ -13,6 +18,22 @@ bot_token = str(os.getenv('BOT_TOKEN'))
 
 # Инициализация клиента Pyrogram
 app = Client('my_bot', api_id=api_id, api_hash=api_hash, bot_token=bot_token)
+
+# Обработчик входящих сообщений
+@app.on_message(filters.private)  # Фильтр для приватных сообщений
+def meow(client, message):
+    # Проверяем случайное число для отправки сообщения или фото
+    rand = random.uniform(0, 1)
+    if has_meaning(message.text):
+        send_random_line(client, message)
+    if has_meaning(message.text) and rand < 1/4:
+        send_random_photo(client, message)
+
+def has_meaning(input_text):
+    words = word_tokenize(input_text)
+    word_count = len(words)
+    min_word_count = 1
+    return word_count >= min_word_count
 
 # Функция для отправки случайной строки на основе вероятностей
 def send_random_line(client, message):
@@ -46,17 +67,6 @@ def send_random_photo(client, message):
     photo_path = 'photos/'  # Путь к папке с фото
     photo = random.choice(os.listdir(photo_path))
     client.send_photo(message.chat.id, photo=open(photo_path + photo, 'rb'))
-
-# Обработчик входящих сообщений
-@app.on_message(filters.private)  # Фильтр для приватных сообщений
-def echo(client, message):
-    # Проверяем случайное число для отправки сообщения или фото
-    rand = random.uniform(0, 1)
-    dynamic_chance = 1/(40/(1 if message.text == None else len(message.text)))
-    if rand < 1/8 + dynamic_chance:
-        send_random_line(client, message)
-    if rand < 1/20 + dynamic_chance*0.5:
-        send_random_photo(client, message)
 
 # Запуск бота
 app.run()

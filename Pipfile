@@ -5,7 +5,9 @@ name = "pypi"
 
 [packages]
 pyrogram = "*"
+tgcrypto = "*"
 python-dotenv = "*"
+nltk = "*"
 
 [dev-packages]
 
